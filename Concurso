@@ -1,0 +1,64 @@
+#Linguagem de programação para realizar a comparação de de conteúdos de editais de concurso já armazenados em colunas de células no excell
+#Script para se realizar a comparação entre matrizes com base em fuzzMatching
+#Lendo o conjunto de dados
+> Resultado<-rbind(Rx1,Rx2,Rx3)
+#Esta matriz que está sendo lida corresponde a um conjunto de disciplinas de concurso que serão comparadas entre si para descobrir matérias em comum
+data<-read.csv("text.csv", header=T,,sep=',')
+
+
+#Triando os dados para cada um dos concursos e criando vetores com a informção de cada um deles
+mma<-subset(data,Concurso=="MMA2023",select=c(Sequência, Matéria))
+icmbio<-subset(data,Concurso=="ICMBio2022",select=c(Sequência, Matéria))
+ibama<-subset(data,Concurso=="IBAMA2022",select=c(Sequência, Matéria))
+
+#Calculando a matriz de comparação para os três concursos
+#Identificando o endereçõ de cada matéria nas colunas
+x1<-adist(mma$Matéria,icmbio$Matéria)
+rownames(x1)<-paste0(mma$Sequência)
+colnames(x1)<-paste0(icmbio$Sequência)
+x2<-adist(mma$Matéria,ibama$Matéria)
+rownames(x2)<-paste0(mma$Sequência)
+colnames(x2)<-paste0(ibama$Sequência)
+x3<-adist(icmbio$Matéria,ibama$Matéria)
+rownames(x3)<-paste0(icmbio$Sequência)
+colnames(x3)<-paste0(ibama$Sequência)
+x4<-adist(icmbio$Matéria,mma$Matéria)
+rownames(x1)<-paste0(icmbio$Sequência)
+colnames(x1)<-paste0(mma$Sequência)
+x5<-adist(ibama$Matéria,mma$Matéria)
+rownames(x5)<-paste0(ibama$Sequência)
+colnames(x5)<-paste0(mma$Sequência)
+x6<-adist(ibama$Matéria, icmbio$Matéria)
+rownames(x3)<-paste0(ibama$Sequência)
+colnames(x3)<-paste0(icmbio$Sequência)
+
+#Descobrindo os valores com o menor score para a distância de levenshtein e a devida identificação da coluna correspondente
+
+Rx1<-t(sapply(seq(nrow(x1)), function(i) {
+j<-which.min(x1[i,])
+c(paste(colnames(x1)[j]),x1[i,j])
+}))
+#print(x1)
+#print(Rx1)
+
+Rx2<-t(sapply(seq(nrow(x2)), function(i) {
+j<-which.min(x2[i,])
+c(paste(colnames(x2)[j]),x2[i,j])
+}))
+#print(x2)
+#print(Rx2)
+
+Rx3<-t(sapply(seq(nrow(x3)), function(i) {
+j<-which.min(x3[i,])
+c(paste(colnames(x3)[j]),x3[i,j])
+}))
+#print(x3)
+#print(Rx3)
+
+#Exportando o resultado
+Resultado<-rbind(Rx1,Rx2,Rx3)
+write.table(Resultado, file="Resultado")
+
+
+#Referência importante para a criação deste código
+# https://stackoverflow.com/questions/20210787/r-getting-the-minimum-value-for-each-row-in-a-matrix-and-returning-the-row-and
